@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warm Spring</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+margin:0;
+background:#f5f2f1;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:8px 16px 16px;
+}
+
+.header{
+text-align:center;
+margin-bottom:8px;
+}
+
+.logo{
+display:block;
+max-width:220px;
+margin:0 auto 6px;
+}
+
+.header h1{
+font-family:Georgia,serif;
+font-weight:500;
+margin:0;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:14px;
+}
+
+.section-title{
+grid-column:1/-1;
+font-size:12px;
+letter-spacing:.15em;
+color:#6d7280;
+margin-top:14px;
+}
+
+.tile{
+aspect-ratio:1;
+border-radius:20px;
+cursor:pointer;
+}
+
+.lightbox{
+position:fixed;
+inset:0;
+display:none;
+z-index:999;
+}
+
+.lightbox.show{
+display:block;
+}
+
+.lightbox-color{
+position:absolute;
+inset:0;
+}
+
+.close-btn{
+position:absolute;
+top:32px;
+right:32px;
+width:36px;
+height:36px;
+border-radius:50%;
+border:none;
+background:rgba(255,255,255,.22);
+color:white;
+font-size:22px;
+display:flex;
+align-items:center;
+justify-content:center;
+backdrop-filter:blur(6px);
+-webkit-backdrop-filter:blur(6px);
+cursor:pointer;
+}
+
+.controls{
+position:absolute;
+top:32px;
+right:84px;
+display:flex;
+gap:8px;
+}
+
+.btn{
+width:36px;
+height:36px;
+border-radius:50%;
+border:none;
+background:rgba(255,255,255,.22);
+color:white;
+font-size:16px;
+display:flex;
+align-items:center;
+justify-content:center;
+backdrop-filter:blur(6px);
+-webkit-backdrop-filter:blur(6px);
+cursor:pointer;
+}
+
+.swipe{
+position:absolute;
+bottom:18px;
+left:50%;
+transform:translateX(-50%);
+color:white;
+letter-spacing:.15em;
+font-size:12px;
+}
+
+@media (max-width:640px){
+.logo{max-width:180px;}
+.grid{gap:12px;}
+.tile{border-radius:18px;}
+
+.close-btn{
+top:28px;
+right:28px;
+}
+
+.controls{
+top:28px;
+right:76px;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<img class="logo" src="logo.png" alt="Shades of Hue logo">
+<h1>Warm Spring</h1>
+<div>Tap color • Swipe to browse</div>
+</div>
+
+<div id="grid" class="grid"></div>
+
+</div>
+
+<div id="lightbox" class="lightbox">
+<div id="lightboxColor" class="lightbox-color"></div>
+
+<button id="close" class="close-btn">×</button>
+
+<div class="controls">
+<button id="prev" class="btn">←</button>
+<button id="next" class="btn">→</button>
+</div>
+
+<div class="swipe">SWIPE</div>
+</div>
+
+<script>
+
+const groups = [
+
+{
+title:"WARM SPRING NEUTRALS",
+colors:[
+"#FFF9E9",
+"#F3E3C7",
+"#E7D0A8",
+"#D8B27E",
+"#BE8B56",
+"#8E5B36"
+]
+},
+
+{
+title:"CAMEL + COGNAC",
+colors:[
+"#E2C29E",
+"#D7AF7A",
+"#CA965F",
+"#B8834E",
+"#9F6E3E",
+"#7F4A18"
+]
+},
+
+{
+title:"BUTTER + HONEY",
+colors:[
+"#F7EA94",
+"#F4DD63",
+"#F1CC3A",
+"#EFB241",
+"#E19A2C",
+"#D98A15"
+]
+},
+
+{
+title:"WARM ORANGES",
+colors:[
+"#F9B44D",
+"#F69C3B",
+"#F58A2A",
+"#F3771D",
+"#EA6417",
+"#D85A10"
+]
+},
+
+{
+title:"CORALS + SALMONS",
+colors:[
+"#F4B0A3",
+"#F39786",
+"#F97C67",
+"#F27B73",
+"#EF675C",
+"#E95A4A"
+]
+},
+
+{
+title:"TOMATO + WARM REDS",
+colors:[
+"#FF4D3D",
+"#F94032",
+"#F1322D",
+"#E74A37",
+"#DF513C",
+"#D63F2E"
+]
+},
+
+{
+title:"WARM PINKS",
+colors:[
+"#E58CA4",
+"#E16D95",
+"#DB5D88",
+"#D94E80",
+"#E85E75"
+]
+},
+
+{
+title:"YELLOW GREENS",
+colors:[
+"#C8D94D",
+"#B7D13F",
+"#A6C93A",
+"#92BE2F",
+"#7BAE2C",
+"#6A9B2A"
+]
+},
+
+{
+title:"SPRING GREENS",
+colors:[
+"#9BD94B",
+"#58D63B",
+"#3FC43A",
+"#21AE39",
+"#1F9F3B",
+"#1B8E41"
+]
+},
+
+{
+title:"TURQUOISE + TEAL",
+colors:[
+"#68C8C7",
+"#48BEC1",
+"#22B5B9",
+"#1AA6AF",
+"#168F96",
+"#0F8288"
+]
+},
+
+{
+title:"AQUA BLUES",
+colors:[
+"#89CAE2",
+"#67B6DD",
+"#47A6D6",
+"#2E95CE",
+"#247FC0"
+]
+},
+
+{
+title:"WARM BLUE ACCENTS",
+colors:[
+"#6786C7",
+"#3D63B1"
+]
+}
+
+];
+
+const grid=document.getElementById("grid");
+const lightbox=document.getElementById("lightbox");
+const lightboxColor=document.getElementById("lightboxColor");
+
+let all=[];
+let index=0;
+let startX=0;
+
+groups.forEach(group=>{
+
+const title=document.createElement("div");
+title.className="section-title";
+title.textContent=group.title;
+grid.appendChild(title);
+
+group.colors.forEach(color=>{
+
+all.push(color);
+
+const tile=document.createElement("div");
+tile.className="tile";
+tile.style.background=color;
+
+tile.onclick=()=>{
+index=all.indexOf(color);
+open();
+};
+
+grid.appendChild(tile);
+
+});
+
+});
+
+function open(){
+lightbox.classList.add("show");
+render();
+}
+
+function render(){
+lightboxColor.style.background=all[index];
+}
+
+function next(){
+index=(index+1)%all.length;
+render();
+}
+
+function prev(){
+index=(index-1+all.length)%all.length;
+render();
+}
+
+document.getElementById("close").onclick=()=>lightbox.classList.remove("show");
+document.getElementById("next").onclick=next;
+document.getElementById("prev").onclick=prev;
+
+lightbox.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX;
+});
+
+lightbox.addEventListener("touchend",e=>{
+let diff=e.changedTouches[0].clientX-startX;
+if(Math.abs(diff)<40)return;
+diff<0?next():prev();
+});
+
+</script>
+
+</body>
+</html>
